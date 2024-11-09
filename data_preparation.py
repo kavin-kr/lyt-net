@@ -66,6 +66,6 @@ def plot_sample_image(data, title):
     plt.tight_layout()
     plt.show()
 
-
+i
 
 
