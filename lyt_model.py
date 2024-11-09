@@ -28,7 +28,8 @@ def LYT(input_shape,num_kernels = 32):
     conv1 = layers.Conv2D(num_kernels, (3, 3), activation='relu', padding='same')(concat2)
     # why tanh?
     lyt_output = layers.Conv2D(3, (3, 3), activation='tanh', padding='same')(conv1)
-    
+    lyt_output = layers.Lambda(yuv_to_rgb)(lyt_output)
+
     return lyt_output
 
 
