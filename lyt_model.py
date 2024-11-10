@@ -19,7 +19,7 @@ def LYT(input_shape,num_kernels = 32):
     u_cwd = CWD(u)
     v_cwd = CWD(v)
     concat1= layers.Concatenate()([u_cwd, v_cwd])
-    uv_processed = layers.Conv2D(num_kernels, (1, 1), padding = 'same', activation='relu')(concat1)    
+    uv_processed = layers.Conv2D(num_kernels, (1, 1), padding = 'same', activation='relu')(concat1)
     alpha = 0.5 # try 0.2?
     scaled_y = alpha * y_processed
     msef_input = uv_processed + scaled_y
@@ -35,7 +35,7 @@ def LYT(input_shape,num_kernels = 32):
 
 def luminance_process(y, num_kernels):
     conv1 = layers.Conv2D(num_kernels, (3, 3), padding = 'same', activation='relu')(y)
-    #Stride = 2 ....8? 
+    #Stride = 2 ....8?
     pooled = layers.MaxPooling2D((3, 3), strides=(2, 2))(conv1)
     mhsa_output = MHSA(pooled,num_kernels)
     upsampled = layers.UpSampling2D(size=(2, 2), interpolation='bilinear')(mhsa_output)
@@ -66,23 +66,35 @@ def CWD(input_layer,num_kernels=16):
 
     return cwd_output
 
-def MHSA(input_layer,embedding_size):
-    
+def MHSA(input_layer, embedding_size, num_heads):
     q_fc = layers.Dense(embedding_size)(input_layer)
     k_fc = layers.Dense(embedding_size)(input_layer)
     v_fc = layers.Dense(embedding_size)(input_layer)
 
-    return
+    q_split = tf.concat(tf.split(q_fc, num_heads, axis=-1), axis=0)
+    k_split = tf.concat(tf.split(k_fc, num_heads, axis=-1), axis=0)
+    v_split = tf.concat(tf.split(v_fc, num_heads, axis=-1), axis=0)
 
-def MSEF(input_layer):
-    return
+    matmul_qk = tf.matmul(q_split, k_split, transpose_b=True)
+    dk = tf.cast(tf.shape(k_split)[-1], tf.float32)
+    scaled_attention_logits = matmul_qk / tf.math.sqrt(dk)
+    attention_weights = tf.nn.softmax(scaled_attention_logits, axis=-1)
+    scaled_attention = tf.matmul(attention_weights, v_split)
 
+    concat_attention = tf.concat(tf.split(scaled_attention, num_heads, axis=0), axis=-1)
 
+    output = layers.Dense(embedding_size)(concat_attention)
 
+    return output
 
+def MSEF(input_layer, num_kernels):
+    norm_layer = layers.LayerNormalization()(input_layer)
+    global_pool = layers.GlobalAveragePooling2D()(norm_layer)
+    s_reduced = layers.Dense(num_kernels // 16, activation='relu')(global_pool)
+    s_expanded = layers.Dense(num_kernels, activation='tanh')(s_reduced)
+    s_expanded = layers.Reshape((1, 1, num_kernels))(s_expanded)
+    dw_conv = layers.DepthwiseConv2D((3, 3), padding='same')(norm_layer)
+    scaled_features = layers.Multiply()([dw_conv, s_expanded])
+    output = layers.Add()([scaled_features, input_layer])
 
-
-
-
-
-
+    return output
