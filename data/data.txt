@@ -1,0 +1,43 @@
+1. LOLv1 Dataset
+    - Contains paired low-light and normal-light images
+    - Google Drive Link - https://drive.google.com/file/d/1vhJg75hIpYvsmryyaxdygAWeHuiY_HWu/view?usp=sharing
+    - Directory Structure
+        LOLv1
+            |--Train
+            |    |--input
+            |    |     ... (485 low-light images)
+            |    |--target
+            |    |     ... (485 normal-light images)
+            |--Test
+            |    |--input
+            |    |     ... (15 low-light images)
+            |    |--target
+            |    |     ... (15 normal-light images)
+
+2. LOLv2 Dataset
+    - Contains more diverse and higher-quality paired low-light and normal-light images captured in real-world scenarios and synthetically generated from normal-light images
+    - Google Drive Link - https://drive.google.com/file/d/1OMfP6Ks2QKJcru1wS2eP629PgvKqF2Tw/view?usp=sharing
+    - Directory Structure
+        LOLv2
+          |--Real_captured
+          |    |--Train
+          |    |    |--Low
+          |    |    |     ... (689 low-light images)
+          |    |    |--Normal
+          |    |    |     ... (689 normal-light images)
+          |    |--Test
+          |    |    |--Low
+          |    |    |     ... (100 low-light images)
+          |    |    |--Normal
+          |    |    |     ... (100 normal-light images)
+          |--Synthetic
+          |    |--Train
+          |    |    |--Low
+          |    |    |     ... (900 low-light images)
+          |    |    |--Normal
+          |    |    |     ... (900 normal-light images)
+          |    |--Test
+          |    |    |--Low
+          |    |    |     ... (100 low-light images)
+          |    |    |--Normal
+          |    |    |     ... (100 normal-light images)

@@ -1,0 +1,8 @@
+# ignore all files in this directory
+*
+
+# track these files
+!.gitignore
+!data.txt
+!model.txt
+!requirements.txt
