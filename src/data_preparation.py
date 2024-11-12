@@ -46,6 +46,16 @@ def preprocess_dataset(input_path, target_path, img_size = (256,256), batch_size
 
     return data
 
+def split_dataset(dataset, val_split=0.2):
+    dataset_size = tf.data.experimental.cardinality(dataset).numpy()
+    val_size = int(val_split * dataset_size)
+    train_size = dataset_size - val_size
+    
+    train_dataset = dataset.take(train_size)
+    val_dataset = dataset.skip(train_size).take(val_size)
+    
+    return train_dataset, val_dataset
+
 def plot_sample_image(data, title):
     plt.figure(figsize=(10, 5))
     
@@ -67,5 +77,17 @@ def plot_sample_image(data, title):
     plt.show()
 
 
+
+def cosine_schedule(initial_lr, min_lr, first_decay_steps, t_mul=2.0, m_mul=1.0):
+    alpha = min_lr / initial_lr  
+    
+    cosine_decay = tf.keras.optimizers.schedules.CosineDecayRestarts(
+        initial_learning_rate=initial_lr,
+        first_decay_steps=first_decay_steps,
+        t_mul=t_mul,
+        m_mul=m_mul,
+        alpha=alpha
+    )
+    return cosine_decay
 
 
