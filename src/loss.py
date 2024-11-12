@@ -2,6 +2,13 @@ import tensorflow as tf
 import cv2
 import numpy as np
 
+
+vgg = tf.keras.applications.VGG19(include_top=False, weights='imagenet')
+vgg.trainable = False
+feature_layer = 'block3_conv3'
+loss_model = tf.keras.Model(inputs=vgg.input,outputs=vgg.get_layer(feature_layer).output)
+
+
 def smooth_l1_loss(target, pred, beta=1.0):
     diff = tf.abs(target - pred)
     less_than_beta = tf.cast(tf.less(diff, beta), tf.float32)
@@ -14,14 +21,14 @@ def smooth_l1_loss(target, pred, beta=1.0):
 
 
 
-def perc_loss(target, pred):
-    vgg = tf.keras.applications.VGG19(include_top=False, weights='imagenet')
-    vgg.trainable = False
+def perc_loss(target, pred,feature_model):
+    #vgg = tf.keras.applications.VGG19(include_top=False, weights='imagenet')
+    #vgg.trainable = False
     target = tf.keras.applications.vgg19.preprocess_input(target * 255.0)
     pred = tf.keras.applications.vgg19.preprocess_input(pred * 255.0)
-    feature_layer = 'block3_conv3'
-    feature_model = tf.keras.Model(inputs=vgg.input, 
-                                   outputs=vgg.get_layer(feature_layer).output)
+    #feature_layer = 'block3_conv3'
+    #feature_model = tf.keras.Model(inputs=vgg.input, 
+                                  # outputs=vgg.get_layer(feature_layer).output)
     true_features = feature_model(target)
     pred_features = feature_model(pred)
     perc_loss = tf.reduce_mean(tf.square(true_features - pred_features))
@@ -76,7 +83,7 @@ def hybrid_loss(target, pred):
     alpha_5 = 0.25
 
     L_s = smooth_l1_loss(target, pred)
-    L_perc = perc_loss(target, pred)
+    L_perc = perc_loss(target, pred,loss_model)
     L_hist = hist_loss(target, pred)
     L_psnr = psnr_loss(target, pred)
     L_color = color_loss(target, pred)
