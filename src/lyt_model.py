@@ -11,6 +11,28 @@ def rgb_to_yuv(rgb):
 def yuv_to_rgb(yuv):
     return tf.image.yuv_to_rgb(yuv)
 
+# def yuv_to_rgb(yuv):
+#     # Split the YUV tensor into Y, U, and V components
+#     y, u, v = tf.split(yuv, 3, axis=-1)
+    
+#     # Clip Y to [0, 1] range
+#     y = tf.clip_by_value(y, 0.0, 1.0)
+    
+#     # Clip U and V to [-0.5, 0.5] range
+#     u = tf.clip_by_value(u, -0.5, 0.5)
+#     v = tf.clip_by_value(v, -0.5, 0.5)
+    
+#     # Recombine the clipped components
+#     yuv_clipped = tf.concat([y, u, v], axis=-1)
+    
+#     # Convert back to RGB
+#     rgb = tf.image.yuv_to_rgb(yuv_clipped)
+    
+#     # Ensure RGB values are in [0, 1] range
+#     rgb = tf.clip_by_value(rgb, 0.0, 1.0)
+    
+#     return rgb
+
 def LYT(input_shape,num_kernels = 32):
     inputs = Input(shape=input_shape)
     y, u, v = layers.Lambda(rgb_to_yuv)(inputs)
