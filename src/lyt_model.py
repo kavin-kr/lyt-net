@@ -1,6 +1,6 @@
 
 import tensorflow as tf
-from keras import layers,models,Input,Concatenate,Add
+from keras import layers,models,Input
 
 def rgb_to_yuv(rgb):
     yuv = tf.image.rgb_to_yuv(rgb)
@@ -71,30 +71,34 @@ def MHSA(input_layer, embedding_size, num_heads):
     k_fc = layers.Dense(embedding_size)(input_layer)
     v_fc = layers.Dense(embedding_size)(input_layer)
 
-    q_split = tf.concat(tf.split(q_fc, num_heads, axis=-1), axis=0)
-    k_split = tf.concat(tf.split(k_fc, num_heads, axis=-1), axis=0)
-    v_split = tf.concat(tf.split(v_fc, num_heads, axis=-1), axis=0)
+    q_split = layers.Lambda(lambda x: tf.concat(tf.split(x, num_heads, axis=-1), axis=0))(q_fc)
+    k_split = layers.Lambda(lambda x: tf.concat(tf.split(x, num_heads, axis=-1), axis=0))(k_fc)
+    v_split = layers.Lambda(lambda x: tf.concat(tf.split(x, num_heads, axis=-1), axis=0))(v_fc)
 
-    matmul_qk = tf.matmul(q_split, k_split, transpose_b=True)
-    dk = tf.cast(tf.shape(k_split)[-1], tf.float32)
-    scaled_attention_logits = matmul_qk / tf.math.sqrt(dk)
-    attention_weights = tf.nn.softmax(scaled_attention_logits, axis=-1)
-    scaled_attention = tf.matmul(attention_weights, v_split)
+    matmul_qk = layers.Lambda(lambda x: tf.matmul(x[0], x[1], transpose_b=True))([q_split, k_split])
+    dk = layers.Lambda(lambda x: tf.cast(tf.shape(x)[-1], tf.float32))(k_split)
+    scaled_attention_logits = layers.Lambda(lambda x: x[0] / tf.math.sqrt(x[1]))([matmul_qk, dk])
+    attention_weights = layers.Lambda(lambda x: tf.nn.softmax(x, axis=-1))(scaled_attention_logits)
+    scaled_attention = layers.Lambda(lambda x: tf.matmul(x[0], x[1]))([attention_weights, v_split])
 
-    concat_attention = tf.concat(tf.split(scaled_attention, num_heads, axis=0), axis=-1)
-
+    concat_attention = layers.Lambda(lambda x: tf.concat(tf.split(x, num_heads, axis=0), axis=-1))(scaled_attention)
     output = layers.Dense(embedding_size)(concat_attention)
 
     return output
 
 def MSEF(input_layer, num_kernels):
     norm_layer = layers.LayerNormalization()(input_layer)
-    global_pool = layers.GlobalAveragePooling2D()(norm_layer)
-    s_reduced = layers.Dense(num_kernels // 16, activation='relu')(global_pool)
-    s_expanded = layers.Dense(num_kernels, activation='tanh')(s_reduced)
-    s_expanded = layers.Reshape((1, 1, num_kernels))(s_expanded)
+
     dw_conv = layers.DepthwiseConv2D((3, 3), padding='same')(norm_layer)
-    scaled_features = layers.Multiply()([dw_conv, s_expanded])
+
+    global_pool = layers.GlobalAveragePooling2D()(norm_layer)
+    reduced_descriptor = layers.Dense(num_kernels // 16, activation='relu')(global_pool)
+    expanded_descriptor = layers.Dense(num_kernels, activation='tanh')(reduced_descriptor)
+    expanded_descriptor = layers.Reshape((1, 1, num_kernels))(expanded_descriptor)
+
+
+    scaled_features = layers.Multiply()([dw_conv, expanded_descriptor])
+
     output = layers.Add()([scaled_features, input_layer])
 
     return output

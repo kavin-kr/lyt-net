@@ -24,7 +24,7 @@ def get_datapaths(dataset_name):
 def normalize(input, target):
     return tf.cast(input, tf.float32) / 255.0, tf.cast(target, tf.float32) / 255.0
 
-def preprocess_dataset(input_path, target_path, img_size, batch_size ):
+def preprocess_dataset(input_path, target_path, img_size = 256, batch_size = 1 ):
     input = tf.keras.preprocessing.image_dataset_from_directory(
         input_path,
         labels=None,
