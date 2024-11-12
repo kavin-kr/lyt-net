@@ -43,7 +43,8 @@ def hist_loss(target,pred):
     return hist_loss
 
 def psnr_loss(target,pred):
-    psnr_loss = 40 - cv2.PSNR(target, pred, R=1.0) #generally perfect images are 30 to 50db range
+    psnr = tf.image.psnr(target, pred, max_val=1.0)
+    psnr_loss = tf.reduce_mean(40 - psnr) #generally perfect images are 30 to 50db range
     return psnr_loss
 
 def color_loss(target, pred):
