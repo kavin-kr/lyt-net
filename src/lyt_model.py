@@ -30,7 +30,9 @@ def LYT(input_shape,num_kernels = 32):
     lyt_output = layers.Conv2D(3, (3, 3), activation='tanh', padding='same')(conv1)
     lyt_output = layers.Lambda(yuv_to_rgb)(lyt_output)
 
-    return lyt_output
+    model = models.Model(inputs=inputs, outputs=lyt_output)
+
+    return model
 
 
 def luminance_process(y, num_kernels):
