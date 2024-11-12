@@ -1,6 +1,10 @@
 # ignore all files in this directory
 *
 
+#todo: remove models folder, for now
+!models/
+!models/*
+
 # track these files
 !.gitignore
 !data.txt
