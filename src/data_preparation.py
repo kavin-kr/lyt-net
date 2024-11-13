@@ -24,6 +24,9 @@ def get_datapaths(dataset_name):
 def normalize(input, target):
     return tf.cast(input, tf.float32) / 255.0, tf.cast(target, tf.float32) / 255.0
 
+def normalize(input):
+    return tf.cast(input, tf.float32) / 255.0
+
 def preprocess_dataset(input_path, target_path, img_size = (256,256), batch_size = 1 ):
     input = tf.keras.utils.image_dataset_from_directory(
         input_path,
@@ -40,6 +43,20 @@ def preprocess_dataset(input_path, target_path, img_size = (256,256), batch_size
         image_size=img_size,
         shuffle=False)
     data = tf.data.Dataset.zip((input, target))
+
+    data = data.map(normalize)
+    data = data.prefetch(tf.data.AUTOTUNE)
+
+    return data
+
+def preprocess_dataset(input_path, img_size = (256,256), batch_size = 1 ):
+    data = tf.keras.utils.image_dataset_from_directory(
+        input_path,
+        labels=None,
+        color_mode='rgb',
+        batch_size=batch_size,
+        image_size=img_size,
+        shuffle=False)
 
     data = data.map(normalize)
     data = data.prefetch(tf.data.AUTOTUNE)
