@@ -2,7 +2,7 @@ import tensorflow as tf
 import cv2
 import numpy as np
 
-
+# Initialize VGG for perceptual loss calculation
 vgg = tf.keras.applications.VGG19(include_top=False, weights='imagenet')
 vgg.trainable = False
 feature_layer = 'block3_conv3'
@@ -35,6 +35,7 @@ def perc_loss(target, pred,feature_model):
 
     return perc_loss
 
+# Define Histogram Loss
 def hist_loss(target,pred):
     bins=256
     sigma=0.01
