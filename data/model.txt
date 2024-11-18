@@ -3,6 +3,6 @@ There are three models trained with different datasets all with same epoch 10
 models
     |--lyt_model_LOLv1_Epoch10.keras
     |--lyt_model_LOLv2_Real_Epoch10.keras
-    |--lyt_model_LOLv2_synthetic_Epoch10.keras
+    |--lyt_model_LOLv2_Synthetic_Epoch10.keras
 
 Google Drive Link - https://drive.google.com/drive/folders/1ft_vHN3L4KYns_AO2OXn4aE6-LAOBQgW?usp=sharing
